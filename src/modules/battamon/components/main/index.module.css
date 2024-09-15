@@ -1,0 +1,89 @@
+.container {
+  --line-color: #2e2e2e;
+}
+
+.field {
+  position: relative;
+  height: 600px;
+  width: 900px;
+  margin: 32px auto;
+  border: 1px solid var(--color-border);
+}
+
+.player {
+  position: absolute;
+  height: 38px;
+  width: 36px;
+}
+
+.grand {
+  position: absolute;
+  width: 100%;
+  border: 1px solid var(--line-color);
+  bottom: 20%;
+}
+
+.controller {
+  padding: 16px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  width: 400px;
+  margin: auto;
+}
+
+.meta {
+  display: flex;
+  justify-content: center;
+}
+
+.timer {
+
+}
+
+.statusLabel {
+  text-align: center;
+}
+
+.button {
+  width: 100px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #2e2e2e;
+  border: 0;
+  color: white;
+  padding: 8px 16px;
+  border-bottom: 5px solid #0e0e0e;
+}
+
+.buttonDisabled {
+  background: #666;
+  border-bottom: 0;
+}
+
+.buttonDisabled:hover {
+  transform: none;
+}
+
+.button:active {
+  border: 0;
+  transform: translateY(5px);
+}
+
+.gameState {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 100px;
+}
+
+.gameStateRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gameStateValue {
+  text-align: right;
+}
