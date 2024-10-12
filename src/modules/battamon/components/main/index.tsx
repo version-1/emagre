@@ -62,7 +62,10 @@ export default function BattamonGame() {
     if (timer.tick) {
       obstacles.move(1);
       const headObstacle = obstacles.data[0];
-      if (!headObstacle.done && headObstacle.position < player.data.position.x ) {
+      if (
+        !headObstacle.done &&
+        headObstacle.position < player.data.position.x
+      ) {
         obstacles.pushHistory(headObstacle);
       }
 
@@ -98,71 +101,72 @@ export default function BattamonGame() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.meta}></div>
-      <div className={styles.field}>
-        <div className={styles.gameState}>
-          <div className={styles.gameStateRow}>
-            <div className={styles.gameStateLabel}>Time:</div>
-            <div className={styles.gameStateValue}>{displayTime(time)}</div>
+      <div className={styles.main}>
+        <div className={styles.field}>
+          <div className={styles.gameState}>
+            <div className={styles.gameStateRow}>
+              <div className={styles.gameStateLabel}>Time:</div>
+              <div className={styles.gameStateValue}>{displayTime(time)}</div>
+            </div>
+            <div className={styles.gameStateRow}>
+              <div className={styles.gameStateLabel}>Score:</div>
+              <div className={styles.gameStateValue}>{score}</div>
+            </div>
           </div>
-          <div className={styles.gameStateRow}>
-            <div className={styles.gameStateLabel}>Score:</div>
-            <div className={styles.gameStateValue}>{score}</div>
+          <div
+            className={styles.player}
+            style={{
+              width: "4%",
+              bottom: `${player.data.position.y}%`,
+              left: `${player.data.position.x}%`,
+            }}
+          >
+            <Image src={playerImg} alt="player" fill />
           </div>
+          {obstacles.data.map((item: Obstacle, index: number) => (
+            <ObstacleComponent
+              key={index}
+              height={item.height}
+              position={item.position}
+            />
+          ))}
+          <div className={styles.grand}></div>
         </div>
-        <div
-          className={styles.player}
-          style={{
-            width: "4%",
-            bottom: `${player.data.position.y}%`,
-            left: `${player.data.position.x}%`,
-          }}
-        >
-          <Image src={playerImg} alt="player" fill />
+        <div className={styles.status}>
+          <p className={styles.statusLabel}>{statusLabel[status]}</p>
         </div>
-        {obstacles.data.map((item: Obstacle, index: number) => (
-          <ObstacleComponent
-            key={index}
-            height={item.height}
-            position={item.position}
-          />
-        ))}
-        <div className={styles.grand}></div>
-      </div>
-      <div className={styles.status}>
-        <p className={styles.statusLabel}>{statusLabel[status]}</p>
-      </div>
-      <div className={styles.controller}>
-        <div className={styles.buttons}>
-          <button
-            className={cls({
-              [styles.button]: true,
-              [styles.buttonDisabled]: status === "playing",
-            })}
-            disabled={status === "playing"}
-            onClick={() => {
-              if (status === "gameover") {
+        <div className={styles.controller}>
+          <div className={styles.buttons}>
+            <button
+              className={cls({
+                [styles.button]: true,
+                [styles.buttonDisabled]: status === "playing",
+              })}
+              disabled={status === "playing"}
+              onClick={() => {
+                if (status === "gameover") {
+                  setStatus("playing");
+                  obstacles.reset();
+                  timer.reset();
+                  timer.start((t) => {
+                    setTime(t);
+                  });
+                  return;
+                }
+
+                if (timer.tick) {
+                  return;
+                }
+
                 setStatus("playing");
-                obstacles.reset();
-                timer.reset();
                 timer.start((t) => {
                   setTime(t);
                 });
-                return;
-              }
-
-              if (timer.tick) {
-                return;
-              }
-
-              setStatus("playing");
-              timer.start((t) => {
-                setTime(t);
-              });
-            }}
-          >
-            {status === "gameover" ? "Restart" : "Start"}
-          </button>
+              }}
+            >
+              {status === "gameover" ? "Restart" : "Start"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

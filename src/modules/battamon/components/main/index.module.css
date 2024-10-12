@@ -1,5 +1,7 @@
 .container {
   --line-color: #2e2e2e;
+  display: flex;
+  justify-content: center;
 }
 
 .field {

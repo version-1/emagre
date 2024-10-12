@@ -1,0 +1,20 @@
+.rankingItem {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.title {
+  font-size: 10px;
+}
+
+
+.rank {
+  padding-left: 0;
+}
+
+.rank, .name, .score {
+  padding: 8px;
+}
+
