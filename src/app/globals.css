@@ -3,6 +3,8 @@
   --foreground: #171717;
 
   --color-border: #e1e1e1;
+
+  --z-index-emagre-ranking: 1;
 }
 
 @media (prefers-color-scheme: dark) {

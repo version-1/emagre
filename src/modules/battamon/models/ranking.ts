@@ -14,6 +14,10 @@ export class Ranking {
     this._raw = params;
   }
 
+  get clone() {
+    return new Ranking(this._raw);
+  }
+
   get id() {
     return this._raw.id;
   }
@@ -29,5 +33,10 @@ export class Ranking {
   get score() {
     return this._raw.score;
   }
-}
 
+  setName(name: string) {
+    const cloned = this.clone;
+    cloned._raw.name = name;
+    return cloned;
+  }
+}

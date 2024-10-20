@@ -5,3 +5,7 @@ export const cls = (obj: Record<string, boolean>) => {
     })
     .join(" ");
 };
+
+export const join = (...args: string[]) => {
+  return args.join(" ");
+};

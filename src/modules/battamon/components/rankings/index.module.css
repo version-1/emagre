@@ -1,0 +1,112 @@
+.container {
+  position: absolute;
+  z-index: var(--z-index-emagre-ranking);
+  width: 100%;
+  height: 100%;
+  background: #f5f5f560;
+}
+
+.header {
+  padding: 0 32px;
+}
+
+.title {
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.message {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+.strongMessage{
+  font-size: 24px;
+  font-weight: bold;
+  display: inline-block;
+  margin: 0 8px;
+}
+
+.content {
+  width: 400px;
+  margin: auto;
+  background: white;
+  padding: 32px 0;
+}
+
+.list {
+  margin-bottom: 32px;
+  padding: 16px 0;
+}
+
+.item {
+  padding: 16px;
+  list-style: none;
+  text-align: center;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.itemEven {
+  background: #fafafa;
+}
+
+.itemYours {
+  background: #2e2e2e;
+  font-weight: bold;
+  color: white;
+  animation: blink 0.5s infinite;
+  animation-iteration-count: 6;
+}
+
+@keyframes blink {
+  0% {
+    background: #2e2e2e;
+  }
+  50% {
+    background: #2e2e2e40;
+  }
+  100% {
+    background: #2e2e2e;
+  }
+}
+
+.item:last-child {
+  margin-bottom: 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  cursor: pointer;
+  border: 0;
+  background: var(--primary-color);
+  color: white;
+  margin: 0 8px;
+  padding: 8px 16px;
+}
+
+.buttonOutline {
+  background: white;
+  color: var(--primary-color);
+  border: 1px solid #2e2e2e60;
+}
+
+.input {
+  border: 1px solid #2e2e2e60;
+  padding: 8px;
+  margin: 0 8px;
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+

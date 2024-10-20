@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import styles from "./index.module.css";
 import ObstacleComponent from "../obstacle";
+import Rankings from "../rankings";
 import playerImg from "../../assets/images/grasshopper.svg";
 import useObstacles, { Obstacle } from "../../hooks/useObstacle";
 import usePlayer from "../../hooks/usePlayer";
 import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
 import { cls } from "@/lib/styles";
+import { Ranking } from "../../models/ranking";
 
 const startPosition = 20;
 const groundHeight = 20;
@@ -79,7 +81,7 @@ export default function BattamonGame() {
       return;
     }
 
-    function onKeydown(e) {
+    function onKeydown(e: KeyboardEvent) {
       e.preventDefault();
       if (e.key === " ") {
         if (!player.jumping && status === "playing") {
@@ -103,6 +105,16 @@ export default function BattamonGame() {
     <div className={styles.container}>
       <div className={styles.main}>
         <div className={styles.field}>
+          <Rankings
+            show
+            data={
+              new Ranking({
+                name: "Jiro",
+                rank: 1,
+                score: 1000,
+              })
+            }
+          />
           <div className={styles.gameState}>
             <div className={styles.gameStateRow}>
               <div className={styles.gameStateLabel}>Time:</div>
