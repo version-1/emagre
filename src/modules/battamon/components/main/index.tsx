@@ -7,10 +7,10 @@ import Rankings from "../rankings";
 import playerImg from "../../assets/images/grasshopper.svg";
 import useObstacles, { Obstacle } from "../../hooks/useObstacle";
 import usePlayer from "../../hooks/usePlayer";
+import useGame from "../../hooks/useGame";
 import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
 import { cls } from "@/lib/styles";
-import { Ranking } from "../../models/ranking";
 
 const startPosition = 20;
 const groundHeight = 20;
@@ -21,8 +21,6 @@ const statusLabel = {
   playing: "Playing...",
   gameover: "Game Over!!!!!",
 };
-
-type Statuses = keyof typeof statusLabel;
 
 function displayTime(time: number) {
   function pad(num: number) {
@@ -36,8 +34,16 @@ const pointPerTime = 100;
 export default function BattamonGame() {
   const [time, setTime] = useState(0);
   const [timer] = useState(new Timer({ interval: 100 }));
-  const [status, setStatus] = useState<Statuses>("ready");
-  const [score, setScore] = useState(0);
+  const {
+    result,
+    status,
+    score,
+    isPlaying,
+    isGameover,
+    setResult,
+    setStatus,
+    setScore,
+  } = useGame();
   const obstacles = useObstacles({
     groundHeight,
     count: 1,
@@ -50,6 +56,15 @@ export default function BattamonGame() {
 
   const conflict = obstacles.body.some((body) => intersect(body, player.body));
 
+  function restart() {
+    setStatus("playing");
+    obstacles.reset();
+    timer.reset();
+    timer.start((t) => {
+      setTime(t);
+    });
+  }
+
   useEffect(() => {
     return () => {
       timer.stop();
@@ -57,7 +72,7 @@ export default function BattamonGame() {
   }, []);
 
   useEffect(() => {
-    if (status !== "playing") {
+    if (!isPlaying) {
       return;
     }
 
@@ -78,6 +93,10 @@ export default function BattamonGame() {
     if (conflict) {
       timer.stop();
       setStatus("gameover");
+      setResult({
+        name: "Guest",
+        score,
+      });
       return;
     }
 
@@ -105,16 +124,9 @@ export default function BattamonGame() {
     <div className={styles.container}>
       <div className={styles.main}>
         <div className={styles.field}>
-          <Rankings
-            show
-            data={
-              new Ranking({
-                name: "Jiro",
-                rank: 1,
-                score: 1000,
-              })
-            }
-          />
+          {isGameover ? (
+            <Rankings show data={result} onRestart={restart} />
+          ) : null}
           <div className={styles.gameState}>
             <div className={styles.gameStateRow}>
               <div className={styles.gameStateLabel}>Time:</div>
@@ -156,13 +168,8 @@ export default function BattamonGame() {
               })}
               disabled={status === "playing"}
               onClick={() => {
-                if (status === "gameover") {
-                  setStatus("playing");
-                  obstacles.reset();
-                  timer.reset();
-                  timer.start((t) => {
-                    setTime(t);
-                  });
+                if (isGameover) {
+                  restart();
                   return;
                 }
 
@@ -176,7 +183,7 @@ export default function BattamonGame() {
                 });
               }}
             >
-              {status === "gameover" ? "Restart" : "Start"}
+              {isGameover ? "Restart" : "Start"}
             </button>
           </div>
         </div>

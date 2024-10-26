@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
-import { Ranking } from "../../models/ranking";
+import { Ranking, resolveRankings } from "../../models/ranking";
+import { getRankingsAround } from "../../services/firebase";
 import { cls, join } from "@/lib/styles";
 
 type Props = {
-  data: Ranking;
+  data?: Ranking;
   show?: boolean;
   onShow?: () => void;
   onRestart?: () => void;
   onSubmit?: (data: Ranking) => void;
-};
-
-const sort = (list: Ranking[]) => {
-  const sorted = list.slice();
-  sorted.sort((a, b) => {
-    return b.score - a.score;
-  });
-
-  return sorted;
 };
 
 type FormProps = {
@@ -28,6 +20,9 @@ type FormProps = {
 
 function Form({ data, onSubmit, onBack }: FormProps) {
   const [name, setName] = useState("");
+  if (!data) {
+    return null;
+  }
   return (
     <form
       className={styles.form}
@@ -59,24 +54,45 @@ function Form({ data, onSubmit, onBack }: FormProps) {
     </form>
   );
 }
-export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
-  const [page, setPage] = useState("index");
-  const list = [
-    ...[
-      { id: "1", name: "Namage", rank: 4, score: 700 },
-      { id: "1", name: "Namage", rank: 5, score: 600 },
-      { id: "1", name: "Namage", rank: 6, score: 500 },
-      { id: "1", name: "Namage", rank: 7, score: 400 },
-      { id: "1", name: "Namage", rank: 8, score: 300 },
-      { id: "1", name: "Namage", rank: 9, score: 200 },
-    ].map((item) => new Ranking(item)),
-    data,
-  ];
 
-  const sortedList = sort(list);
+const pages = {
+  index: "index",
+  form: "form",
+};
+
+export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
+  const [page, setPage] = useState(pages.index);
+  const [form, setForm] = useState<Ranking>();
+  const [list, setList] = useState<Ranking[]>([]);
+
   useEffect(() => {
+    const init = async () => {
+      if (!data) {
+        throw new Error("data is required");
+      }
+
+      const [before, after] = await getRankingsAround({
+        score: data?.score || 0,
+        per: 3,
+      });
+      const beforeRank = before[0]?.rank || 1;
+      const beforeScore = before[0]?.score || -Infinity;
+      const rank =
+        data && beforeScore <= data.score ? beforeRank : beforeRank + 1;
+      const newData = data.setRank(rank);
+      setForm(newData);
+
+      const list = resolveRankings(before, after, newData);
+      setList(list);
+    };
+
+    init();
     onShow?.();
   }, []);
+
+  if (!form) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -85,15 +101,15 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
           <h1 className={styles.title}>結果発表</h1>
           <p className={styles.message}>
             あなたのスコアは
-            <span className={styles.strongMessage}>{data.rank}位 </span>
-            <span className={styles.strongMessage}>{data.score}点</span>
+            <span className={styles.strongMessage}>{form.rank}位 </span>
+            <span className={styles.strongMessage}>{form.score}点</span>
             でした！
           </p>
         </div>
         {page === "index" ? (
           <>
             <ul className={styles.list}>
-              {sortedList.map((item, index) => {
+              {list.map((item, index) => {
                 const even = (index + 1) % 2 === 0;
                 const yours = item.id === undefined;
                 return (
@@ -116,7 +132,7 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
               <button
                 className={styles.button}
                 onClick={() => {
-                  setPage("form");
+                  setPage(pages.form);
                 }}
               >
                 ランキング送信
@@ -125,6 +141,7 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
                 className={join(styles.button, styles.buttonOutline)}
                 onClick={() => {
                   onRestart?.();
+                  setPage(pages.index);
                 }}
               >
                 リスタート
@@ -132,12 +149,12 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
             </div>
           </>
         ) : null}
-        {page === "form" ? (
+        {page === pages.form ? (
           <Form
-            data={data}
+            data={form}
             onSubmit={onSubmit}
             onBack={() => {
-              setPage("index");
+              setPage(pages.index);
             }}
           />
         ) : null}

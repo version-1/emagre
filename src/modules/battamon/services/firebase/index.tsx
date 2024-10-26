@@ -37,7 +37,7 @@ export async function addRanking({
     const prev = querySnapshot.docs[0].data();
     const prevRankQuery = query(collref, where("score", "==", prev.score));
     const qs = await getCountFromServer(prevRankQuery);
-    debugger
+    debugger;
     const prevRankCounts = qs.data().count;
     rank = prev.rank + (prevRankCounts - 1) + 1;
   }
@@ -75,22 +75,23 @@ export async function getRankingsAround({
   score,
   per,
 }: {
-  score: string;
+  score: number;
   per: number;
 }): Promise<Ranking[][]> {
   const collref = collection(db, "rankings");
+  const bufferMultipler = 2;
   const beforeQuery = query(
     collref,
-    orderBy("score", "desc"),
+    orderBy("score", "asc"),
     where("score", ">=", score),
-    limit(per),
+    limit(per * bufferMultipler),
   );
 
   const afterQuery = query(
     collref,
     orderBy("score", "desc"),
     where("score", "<=", score),
-    limit(per),
+    limit(per * bufferMultipler),
   );
 
   return Promise.all([
