@@ -18,7 +18,10 @@ export class Ranking {
     this._raw = params;
 
     if (params.results) {
-      this._results = params.results.map((result) => new Result(result));
+      this._results = params.results.map((p) => {
+        const result = new Result(p);
+        return result.setParent(this);
+      });
     }
   }
 
@@ -34,8 +37,16 @@ export class Ranking {
     return this._raw.rank;
   }
 
+  get nextRank() {
+    return this._raw.rank ? this._raw.rank + this._raw.count : 1;
+  }
+
   get score() {
     return this._raw.score;
+  }
+
+  get timestamp() {
+    return this._raw.timestamp;
   }
 
   get count() {
@@ -44,6 +55,11 @@ export class Ranking {
 
   get results() {
     return this._results;
+  }
+
+  buildResult(params: Partial<ResultParams>) {
+    const result = new Result(params);
+    return result.setParent(this);
   }
 
   setRank(rank: number) {
@@ -58,28 +74,36 @@ export class Ranking {
   }
 }
 
+export function flattenResults(rankings: Ranking[]) {
+  return rankings.reduce((acc, r) => [...acc, ...r.results], [] as Result[]);
+}
+
 export const resolveRankings = (
   before: Ranking[],
   after: Ranking[],
-  target: Ranking,
+  target: Result,
   beforeAfterLength = 3,
-): Ranking[] => {
+): Result[] => {
   const desiredLength = beforeAfterLength * 2 + 1;
 
-  const list = [target];
-  let targetList = [...before];
-  targetList.forEach(() => {
-    const e = before.shift();
-    list.unshift(e!);
+  const beforeList = flattenResults(before);
+  const afterList = flattenResults(after);
+
+  let list = [target];
+  const t1 = [...beforeList];
+  t1.forEach(() => {
+    const e = beforeList.shift()!;
+    list.unshift(e);
+
     if (list.length >= beforeAfterLength + 1) {
       return;
     }
   });
 
-  targetList = [...after];
-  targetList.forEach(() => {
-    const e = after.shift();
-    list.push(e!.incrementRank());
+  const t2 = [...afterList];
+  t2.forEach(() => {
+    const e = afterList.shift()!;
+    list.push(e.incrementRank());
     if (list.length >= desiredLength) {
       return;
     }
@@ -89,9 +113,9 @@ export const resolveRankings = (
     return list;
   }
 
-  targetList = [...before];
-  targetList.forEach((_) => {
-    const e = before.shift();
+  const t3 = [...beforeList];
+  t3.forEach((_) => {
+    const e = beforeList.shift();
     list.unshift(e!);
     if (list.length >= desiredLength) {
       return;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
 import { Ranking, resolveRankings } from "../../models/ranking";
+import { Result } from "../../models/result";
 import { getRankingsAround } from "../../services/firebase";
 import { cls, join } from "@/lib/styles";
 
@@ -13,8 +14,8 @@ type Props = {
 };
 
 type FormProps = {
-  data: Ranking;
-  onSubmit?: (data: Ranking) => void;
+  data: Result;
+  onSubmit?: (data: Result) => void;
   onBack: () => void;
 };
 
@@ -34,7 +35,7 @@ function Form({ data, onSubmit, onBack }: FormProps) {
         }
         if (name.length > 10) {
           alert("名前は10文字以内で入力してください");
-          return
+          return;
         }
         data.setName(name);
         onSubmit?.(data);
@@ -66,8 +67,8 @@ const pages = {
 
 export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
   const [page, setPage] = useState(pages.index);
-  const [form, setForm] = useState<Ranking>();
-  const [list, setList] = useState<Ranking[]>([]);
+  const [form, setForm] = useState<Result>();
+  const [list, setList] = useState<Result[]>([]);
 
   useEffect(() => {
     const init = async () => {
@@ -82,11 +83,17 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
       const beforeRank = before[0]?.rank || 1;
       const beforeScore = before[0]?.score || -Infinity;
       const rank =
-        data && beforeScore <= data.score ? beforeRank : beforeRank + 1;
+        data && beforeScore <= data.score
+          ? beforeRank
+          : before[0]?.nextRank || 1;
       const newData = data.setRank(rank);
-      setForm(newData);
+      const result = newData.buildResult({
+        name: "Guest",
+        timestamp: newData.timestamp,
+      });
+      setForm(result);
 
-      const list = resolveRankings(before, after, newData);
+      const list = resolveRankings(before, after, result);
       setList(list);
     };
 

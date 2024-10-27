@@ -8,9 +8,11 @@ import {
   where,
   getDocs,
   QueryDocumentSnapshot,
+  Query,
 } from "@firebase/firestore";
 import { db } from "@/services/firebase";
 import { Ranking } from "../../models/ranking";
+import { ResultParams } from "../../models/result";
 
 const namespaces = {
   rankings: "rankings",
@@ -77,7 +79,7 @@ export async function getRankings({
   );
 
   const querySnapshot = await getDocs(q);
-  return mapSnapshot(querySnapshot);
+  return mapSnapshot(querySnapshot, per);
 }
 
 export async function getRankingsAround({
@@ -89,27 +91,24 @@ export async function getRankingsAround({
 }): Promise<Ranking[][]> {
   const collref = collection(db, "rankings");
   const bufferMultipler = 2;
+  const take = per * bufferMultipler;
   const beforeQuery = query(
     collref,
     orderBy("score", "asc"),
     where("score", ">=", score),
-    limit(per * bufferMultipler),
+    limit(take),
   );
 
   const afterQuery = query(
     collref,
     orderBy("score", "desc"),
     where("score", "<=", score),
-    limit(per * bufferMultipler),
+    limit(take),
   );
 
   return Promise.all([
-    (async function () {
-      return mapSnapshot(await getDocs(beforeQuery));
-    })(),
-    (async function () {
-      return mapSnapshot(await getDocs(afterQuery));
-    })(),
+    mapSnapshot(await getDocs(beforeQuery), take),
+    mapSnapshot(await getDocs(afterQuery), take),
   ]);
 }
 
@@ -117,22 +116,42 @@ interface Foreach {
   forEach: (callback: (doc: QueryDocumentSnapshot) => void) => void;
 }
 
-function mapSnapshot(snapshot: Foreach) {
-  const list: Ranking[] = [];
+function mapSnapshot(snapshot: Foreach, perForSubDocs: number) {
+  const res: Promise<Ranking>[] = [];
   snapshot.forEach((doc) => {
-    list.push(scanList(doc));
+    const subRef = collection(
+      db,
+      namespaces.rankings,
+      doc.id,
+      namespaces.results,
+    );
+    const subQuery = query(
+      subRef,
+      orderBy("timestamp", "desc"),
+      limit(perForSubDocs),
+    );
+    res.push(scanList(doc, subQuery));
   });
-
-  return list;
+  return Promise.all(res);
 }
 
-function scanList(doc: QueryDocumentSnapshot) {
+async function scanList(doc: QueryDocumentSnapshot, subQuery: Query) {
   const data = doc.data();
+
+  const subSnapshot = await getDocs(subQuery);
+  const results: ResultParams[] = [];
+  subSnapshot.forEach((subDoc: QueryDocumentSnapshot) => {
+    const { name, timestamp } = subDoc.data();
+    results.push({ id: subDoc.id, name, timestamp });
+  });
+
   return new Ranking({
     id: doc.id,
     rank: data.rank,
     score: data.score,
     cursor: data.cursor,
+    count: results.length,
+    results,
     timestamp: data.timestamp,
   });
 }

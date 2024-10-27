@@ -1,18 +1,20 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./index.module.css";
-import { Ranking } from "../../models/ranking";
+import { flattenResults } from "../../models/ranking";
+import { Result } from "../../models/result";
 import { getRankings } from "../../services/firebase";
 
 export default function Sidebar() {
-  const [rankings, setRankings] = useState<Ranking[]>([]);
+  const [rankings, setRankings] = useState<Result[]>([]);
 
   useEffect(() => {
     const init = async () => {
-      const list = await getRankings({
+      const rankings = await getRankings({
         cursor: "",
         per: 10,
       });
+      const list = flattenResults(rankings);
 
       setRankings(list);
     };
