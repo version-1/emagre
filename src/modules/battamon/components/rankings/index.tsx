@@ -32,6 +32,10 @@ function Form({ data, onSubmit, onBack }: FormProps) {
           alert("名前を入力してください");
           return;
         }
+        if (name.length > 10) {
+          alert("名前は10文字以内で入力してください");
+          return
+        }
         data.setName(name);
         onSubmit?.(data);
       }}

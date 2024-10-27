@@ -7,7 +7,6 @@ import {
   startAfter,
   where,
   getDocs,
-  getCountFromServer,
   QueryDocumentSnapshot,
 } from "@firebase/firestore";
 import { db } from "@/services/firebase";
@@ -15,39 +14,49 @@ import { Ranking } from "../../models/ranking";
 
 const namespaces = {
   rankings: "rankings",
+  results: "results",
 };
 
 export async function addRanking({
   name,
   score,
+  timestamp,
 }: {
   name: string;
   score: number;
+  timestamp: number;
 }) {
   const collref = collection(db, namespaces.rankings);
   const q = query(
     collref,
     orderBy("score", "desc"),
-    where("score", ">", score),
+    where("score", ">=", score),
     limit(1),
   );
   const querySnapshot = await getDocs(q);
   let rank = 1;
-  if (querySnapshot.size > 0) {
-    const prev = querySnapshot.docs[0].data();
-    const prevRankQuery = query(collref, where("score", "==", prev.score));
-    const qs = await getCountFromServer(prevRankQuery);
-    debugger;
-    const prevRankCounts = qs.data().count;
-    rank = prev.rank + (prevRankCounts - 1) + 1;
+  const prev = querySnapshot.docs?.[0]?.data();
+  if (prev?.score === score) {
+    return addDocToRanking(prev.id, { name, timestamp });
   }
 
-  const timestamp = Date.now();
-  return addDoc(collection(db, "rankings"), {
-    name,
+  const prevRank = prev?.score || 0;
+  const doc = await addDoc(collection(db, "rankings"), {
     rank,
-    score,
+    score: prevRank + 1,
     cursor: `${score}-${timestamp}`,
+    timestamp,
+  });
+
+  return addDocToRanking(doc.id, { name, timestamp });
+}
+
+function addDocToRanking(
+  id: string,
+  { name, timestamp }: { name: string; timestamp: number },
+) {
+  return addDoc(collection(db, namespaces.rankings, id, namespaces.results), {
+    name,
     timestamp,
   });
 }
@@ -122,7 +131,6 @@ function scanList(doc: QueryDocumentSnapshot) {
   return new Ranking({
     id: doc.id,
     rank: data.rank,
-    name: data.name,
     score: data.score,
     cursor: data.cursor,
     timestamp: data.timestamp,

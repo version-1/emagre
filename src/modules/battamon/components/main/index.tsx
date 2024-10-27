@@ -65,6 +65,10 @@ export default function BattamonGame() {
     });
   }
 
+  function submitResult(data: Ranking) {
+
+  }
+
   useEffect(() => {
     return () => {
       timer.stop();

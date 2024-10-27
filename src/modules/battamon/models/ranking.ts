@@ -1,17 +1,25 @@
+import { Result, ResultParams } from "./result";
+
 export type RankingParams = {
   id?: string;
-  name: string;
   score: number;
+  count: number;
   rank?: number;
+  results?: ResultParams[];
   cursor?: string;
   timestamp?: number;
 };
 
 export class Ranking {
   private _raw: RankingParams;
+  private _results: Result[] = [];
 
   constructor(params: RankingParams) {
     this._raw = params;
+
+    if (params.results) {
+      this._results = params.results.map((result) => new Result(result));
+    }
   }
 
   get clone() {
@@ -26,18 +34,16 @@ export class Ranking {
     return this._raw.rank;
   }
 
-  get name() {
-    return this._raw.name;
-  }
-
   get score() {
     return this._raw.score;
   }
 
-  setName(name: string) {
-    const cloned = this.clone;
-    cloned._raw.name = name;
-    return cloned;
+  get count() {
+    return this._raw.count;
+  }
+
+  get results() {
+    return this._results;
   }
 
   setRank(rank: number) {
