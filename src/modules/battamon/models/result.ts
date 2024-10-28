@@ -34,6 +34,10 @@ export class Result {
     return this._raw.name;
   }
 
+  get timestamp() {
+    return this._raw.timestamp;
+  }
+
   get rank() {
     return this.parent?.rank;
   }
@@ -48,7 +52,7 @@ export class Result {
     return cloned;
   }
 
-  setParent(parent: Ranking): Ranking {
+  setParent(parent: Ranking): Result {
     const cloned = this.clone;
     cloned._parent = parent;
     return cloned;

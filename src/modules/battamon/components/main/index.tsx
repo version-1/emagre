@@ -56,6 +56,12 @@ export default function BattamonGame() {
 
   const conflict = obstacles.body.some((body) => intersect(body, player.body));
 
+  function reset() {
+    setStatus("ready");
+    obstacles.reset();
+    timer.reset();
+  }
+
   function restart() {
     setStatus("playing");
     obstacles.reset();
@@ -63,10 +69,6 @@ export default function BattamonGame() {
     timer.start((t) => {
       setTime(t);
     });
-  }
-
-  function submitResult(data: Ranking) {
-
   }
 
   useEffect(() => {
@@ -98,7 +100,6 @@ export default function BattamonGame() {
       timer.stop();
       setStatus("gameover");
       setResult({
-        name: "Guest",
         score,
       });
       return;
@@ -129,7 +130,7 @@ export default function BattamonGame() {
       <div className={styles.main}>
         <div className={styles.field}>
           {isGameover ? (
-            <Rankings show data={result} onRestart={restart} />
+            <Rankings show data={result} onRestart={reset} onSubmit={reset} />
           ) : null}
           <div className={styles.gameState}>
             <div className={styles.gameStateRow}>

@@ -22,10 +22,12 @@ const namespaces = {
 export async function addRanking({
   name,
   score,
+  rank,
   timestamp,
 }: {
   name: string;
   score: number;
+  rank: number;
   timestamp: number;
 }) {
   const collref = collection(db, namespaces.rankings);
@@ -36,16 +38,14 @@ export async function addRanking({
     limit(1),
   );
   const querySnapshot = await getDocs(q);
-  let rank = 1;
   const prev = querySnapshot.docs?.[0]?.data();
   if (prev?.score === score) {
     return addDocToRanking(prev.id, { name, timestamp });
   }
 
-  const prevRank = prev?.score || 0;
   const doc = await addDoc(collection(db, "rankings"), {
     rank,
-    score: prevRank + 1,
+    score,
     cursor: `${score}-${timestamp}`,
     timestamp,
   });

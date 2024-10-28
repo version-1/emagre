@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
-import { Ranking, resolveRankings } from "../../models/ranking";
+import { resolveRankings } from "../../models/ranking";
 import { Result } from "../../models/result";
-import { getRankingsAround } from "../../services/firebase";
+import { getRankingsAround, addRanking } from "../../services/firebase";
 import { cls, join } from "@/lib/styles";
 
 type Props = {
-  data?: Ranking;
+  data?: Result;
   show?: boolean;
   onShow?: () => void;
   onRestart?: () => void;
-  onSubmit?: (data: Ranking) => void;
+  onSubmit?: () => void;
 };
 
 type FormProps = {
@@ -70,6 +70,16 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
   const [form, setForm] = useState<Result>();
   const [list, setList] = useState<Result[]>([]);
 
+  const _onSubmit = async (data: Result) => {
+    await addRanking({
+      name: data.name,
+      score: data.score!,
+      rank: data.rank!,
+      timestamp: data.timestamp,
+    });
+    onSubmit?.();
+  };
+
   useEffect(() => {
     const init = async () => {
       if (!data) {
@@ -83,10 +93,10 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
       const beforeRank = before[0]?.rank || 1;
       const beforeScore = before[0]?.score || -Infinity;
       const rank =
-        data && beforeScore <= data.score
+        data && beforeScore <= data!.score!
           ? beforeRank
           : before[0]?.nextRank || 1;
-      const newData = data.setRank(rank);
+      const newData = data.parent!.setRank(rank);
       const result = newData.buildResult({
         name: "Guest",
         timestamp: newData.timestamp,
@@ -163,7 +173,7 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
         {page === pages.form ? (
           <Form
             data={form}
-            onSubmit={onSubmit}
+            onSubmit={_onSubmit}
             onBack={() => {
               setPage(pages.index);
             }}
