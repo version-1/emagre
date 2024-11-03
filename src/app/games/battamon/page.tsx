@@ -7,7 +7,7 @@ export default function Battamon() {
   return (
     <Layout
       left={
-        <div className={styles.sidebar}>
+        <div className={styles.left}>
           <div className={styles.howToPlay}>
             <h2 className={styles.sectionTitle}>遊び方</h2>
             <p className={styles.descriptionText}>
@@ -35,7 +35,7 @@ export default function Battamon() {
         </div>
       }
       right={
-        <div className={styles.sidebar}>
+        <div className={styles.right}>
           <Sidebar />
         </div>
       }

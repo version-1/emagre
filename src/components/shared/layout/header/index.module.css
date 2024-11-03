@@ -7,11 +7,15 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.sidebar {
-  width: 400px;
-  border-right: 1px solid var(--color-border);
+.logo {
+  display: flex;
+  align-items: center;
 }
 
-.logo {
+.logoImage {
+   margin-right: 16px;
+}
 
+.logoText {
+  font-size: 14px;
 }

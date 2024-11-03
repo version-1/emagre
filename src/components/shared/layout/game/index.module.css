@@ -1,17 +1,22 @@
 .container {
   display: flex;
+  justify-content: space-between;
   height: calc(100vh - 48px);
   overflow: hidden;
 }
 
 .left {
+  max-width: 400px;
   width: 400px;
   border-right: 1px solid var(--color-border);
+  background: #f9f9f9;
 }
 
 .right {
+  max-width: 400px;
   width: 400px;
   border-left: 1px solid var(--color-border);
+  background: #f9f9f9;
 }
 
 .content {
