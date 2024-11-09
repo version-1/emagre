@@ -44,11 +44,7 @@ export default function BattamonGame() {
     setStatus,
     setScore,
   } = useGame();
-  const obstacles = useObstacles({
-    groundHeight,
-    count: 1,
-    heights: [10, 20, 30],
-  });
+  const obstacles = useObstacles();
   const player = usePlayer({
     startPosition,
     groundHeight,
@@ -83,9 +79,10 @@ export default function BattamonGame() {
     }
 
     if (timer.tick) {
-      obstacles.move(1);
+      obstacles.move(timer.value, 1);
       const headObstacle = obstacles.data[0];
       if (
+        headObstacle &&
         !headObstacle.done &&
         headObstacle.position < player.data.position.x
       ) {

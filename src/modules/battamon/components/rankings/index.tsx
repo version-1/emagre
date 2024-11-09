@@ -133,9 +133,10 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
               {list.map((item, index) => {
                 const even = (index + 1) % 2 === 0;
                 const yours = item.id === undefined;
+                // new ranking record doesn't have id and put placeholder for it.
                 return (
                   <li
-                    key={item.id}
+                    key={item.id || 'yours'}
                     className={cls({
                       [styles.item]: true,
                       [styles.itemEven]: !yours && even,

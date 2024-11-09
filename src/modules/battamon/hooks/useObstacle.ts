@@ -1,6 +1,7 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 
 export type Obstacle = {
+  tick: number;
   height: number;
   position: number;
   done?: boolean;
@@ -27,39 +28,46 @@ const calcObstaclePoint = (list: Obstacle[]) => {
   }, 0);
 };
 
-export default function useObstacles({
-  groundHeight,
-  count,
-  heights,
-}: {
+type ObstacleProps = {
   groundHeight: number;
   count: number;
   heights: number[];
-}) {
+  popRate: number;
+  minDistance: number;
+};
+
+const defaultSetting: ObstacleProps = {
+  groundHeight: 20,
+  count: 2, // 同時に画面に出現できる障害物の数
+  heights: [10, 20],
+  popRate: 0.01,
+  minDistance: 30,
+};
+
+export default function useObstacles() {
+  const [setting, setSetting] = useState<ObstacleProps>(defaultSetting);
   const [data, setData] = useState<Obstacle[]>([]);
   const [history, setHistory] = useState<Obstacle[]>([]);
 
-  const init = () => {
-    const items = [];
-    for (let i = 0; i < count; i++) {
-      const initialPos = (Math.floor(Math.random() * 60) + 40) % 100;
-      items.push(initObstacle(initialPos));
-    }
-    setData(items);
+  const reset = () => {
+    setData([]);
     setHistory([]);
   };
 
-  useEffect(() => {
-    init();
-  }, []);
-
-  const initObstacle = (position: number) => {
-    const height = heights[Math.floor(Math.random() * heights.length)];
-    return { height, position };
+  const updateSetting = (newSetting: Partial<ObstacleProps>) => {
+    setSetting((prev) => {
+      return { ...prev, ...newSetting };
+    });
   };
 
-  const add = (n: number) => {
-    return new Array(n).fill(initObstacle(100));
+  const initObstacle = (tick: number, position: number) => {
+    const height =
+      setting.heights[Math.floor(Math.random() * setting.heights.length)];
+    return { tick, height, position } as Obstacle;
+  };
+
+  const add = (tick: number) => {
+    return initObstacle(tick, 100);
   };
 
   const pushHistory = (obst: Obstacle) => {
@@ -76,17 +84,22 @@ export default function useObstacles({
 
   const points = useMemo(() => calcObstaclePoint(history), [history]);
 
-  const move = (delta: number) => {
+  const move = (tick: number, delta: number) => {
     const items = data.map((item) => {
       return {
         ...item,
         position: item.position - delta,
-      };
+      } as Obstacle;
     });
 
     const newItems = items.filter((it) => it.position > 0);
-    if (newItems.length === 0) {
-      setData(add(count));
+    const last = newItems[newItems.length - 1];
+    const canAdd = !last || last.position < 100 - setting.minDistance;
+    const shouldPop =
+      newItems.length === 0 || Math.random() > 1 - setting.popRate;
+    if (setting.count > newItems.length && canAdd && shouldPop) {
+      const adding = add(tick);
+      setData([...newItems, adding] as Obstacle[]);
     } else {
       setData(newItems);
     }
@@ -95,9 +108,27 @@ export default function useObstacles({
   const body = useMemo(() => {
     return data.map((item) => {
       const obstacleWidth = 2;
-      return calcBody(groundHeight, item.position, item.height, obstacleWidth);
+      return calcBody(
+        setting.groundHeight,
+        item.position,
+        item.height,
+        obstacleWidth,
+      );
     });
   }, [data]);
 
-  return { data, history, points, body, move, reset: init, pushHistory };
+  if (!process.env.DISABLE_DEBUG) {
+    console.log("watch obstacles data", data);
+  }
+
+  return {
+    data,
+    history,
+    points,
+    body,
+    move,
+    reset,
+    pushHistory,
+    updateSetting,
+  };
 }
