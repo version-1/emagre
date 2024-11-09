@@ -15,13 +15,6 @@ import { cls } from "@/lib/styles";
 const startPosition = 20;
 const groundHeight = 20;
 
-const statusLabel = {
-  clear: "Clear!!!!!!!!",
-  ready: "Ready",
-  playing: "Playing...",
-  gameover: "Game Over!!!!!",
-};
-
 function displayTime(time: number) {
   function pad(num: number) {
     return num.toString().padStart(2, "0");
@@ -51,6 +44,9 @@ export default function BattamonGame() {
   });
 
   const conflict = obstacles.body.some((body) => intersect(body, player.body));
+  if (process.env.NODE_ENV === "development") {
+    console.log("watch state", obstacles, player);
+  }
 
   function reset() {
     setStatus("ready");
@@ -79,7 +75,7 @@ export default function BattamonGame() {
     }
 
     if (timer.tick) {
-      obstacles.move(timer.value, 1);
+      obstacles.move(timer.value);
       const headObstacle = obstacles.data[0];
       if (
         headObstacle &&
@@ -158,35 +154,120 @@ export default function BattamonGame() {
           ))}
           <div className={styles.grand}></div>
         </div>
-        <div className={styles.status}>
-          <p className={styles.statusLabel}>{statusLabel[status]}</p>
-        </div>
         <div className={styles.controller}>
-          <div className={styles.buttons}>
-            <button
-              className={cls({
-                [styles.button]: true,
-                [styles.buttonDisabled]: status === "playing",
-              })}
-              disabled={status === "playing"}
-              onClick={() => {
-                if (isGameover) {
-                  restart();
-                  return;
-                }
+          <div className={styles.settings}>
+            <div className={styles.setting}>
+              <label className={styles.settingLabel}>Speed</label>
+              <div className={styles.settingValue}>
+                <span className={styles.settingValueText}>
+                  {obstacles.setting.speed}
+                </span>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={obstacles.setting.speed}
+                  disabled={isPlaying}
+                  onChange={(e) => {
+                    obstacles.updateSetting({
+                      speed: Number(e.target.value),
+                    });
+                  }}
+                />
+              </div>
+            </div>
+            <div className={styles.setting}>
+              <label className={styles.settingLabel}>Obstacle Count</label>
+              <div className={styles.settingValue}>
+                <span className={styles.settingValueText}>
+                  {obstacles.setting.count}
+                </span>
+                <input
+                  type="range"
+                  min="1"
+                  max={Math.floor(100 / obstacles.setting.minDistance)}
+                  step="1"
+                  value={obstacles.setting.count}
+                  disabled={isPlaying}
+                  onChange={(e) => {
+                    obstacles.updateSetting({
+                      count: Number(e.target.value),
+                    });
+                  }}
+                />
+              </div>
+            </div>
+            <div className={styles.setting}>
+              <label className={styles.settingLabel}>Obstacle Frequency</label>
+              <div className={styles.settingValue}>
+                <span className={styles.settingValueText}>
+                  {Math.floor(obstacles.setting.popRate * 100)}%
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={obstacles.setting.popRate * 100}
+                  disabled={isPlaying}
+                  onChange={(e) => {
+                    obstacles.updateSetting({
+                      popRate: Number(e.target.value) / 100,
+                    });
+                  }}
+                />
+              </div>
+            </div>
+            <div className={styles.setting}>
+              <label className={styles.settingLabel}>Min Distance</label>
+              <div className={styles.settingValue}>
+                <span className={styles.settingValueText}>
+                  {obstacles.setting.minDistance}
+                </span>
+                <input
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={obstacles.setting.minDistance}
+                  disabled={isPlaying}
+                  onChange={(e) => {
+                    obstacles.updateSetting({
+                      minDistance: Number(e.target.value),
+                    });
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className={styles.actions}>
+            <div className={styles.buttons}>
+              <button
+                className={cls({
+                  [styles.button]: true,
+                  [styles.buttonDisabled]: status === "playing",
+                })}
+                disabled={status === "playing"}
+                onClick={() => {
+                  if (isGameover) {
+                    restart();
+                    return;
+                  }
 
-                if (timer.tick) {
-                  return;
-                }
+                  if (timer.tick) {
+                    return;
+                  }
 
-                setStatus("playing");
-                timer.start((t) => {
-                  setTime(t);
-                });
-              }}
-            >
-              {isGameover ? "Restart" : "Start"}
-            </button>
+                  setStatus("playing");
+                  timer.start((t) => {
+                    setTime(t);
+                  });
+                }}
+              >
+                {isGameover ? "Restart" : "Start"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

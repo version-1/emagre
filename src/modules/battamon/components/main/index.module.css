@@ -8,7 +8,7 @@
   position: relative;
   height: 600px;
   width: 900px;
-  margin: 32px auto;
+  margin: 8px auto;
   border: 1px solid var(--color-border);
 }
 
@@ -27,32 +27,23 @@
 
 .controller {
   padding: 16px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .buttons {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
+  align-items: center;
   width: 400px;
   margin: auto;
 }
 
-.meta {
-  display: flex;
-  justify-content: center;
-}
-
-.timer {
-
-}
-
-.statusLabel {
-  text-align: center;
-}
-
 .button {
-  width: 100px;
+  width: 200px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 30px;
   background: #2e2e2e;
   border: 0;
   color: white;
@@ -74,6 +65,20 @@
   transform: translateY(5px);
 }
 
+
+.meta {
+  display: flex;
+  justify-content: center;
+}
+
+.timer {
+
+}
+
+.statusLabel {
+  text-align: center;
+}
+
 .gameState {
   position: absolute;
   top: 16px;
@@ -88,4 +93,22 @@
 
 .gameStateValue {
   text-align: right;
+}
+
+.actions {
+  flex: 1;
+}
+
+.settings {
+  flex: 1;
+}
+
+.setting {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.settingLabel {
+  display: block;
 }

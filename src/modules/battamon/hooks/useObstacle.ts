@@ -34,14 +34,16 @@ type ObstacleProps = {
   heights: number[];
   popRate: number;
   minDistance: number;
+  speed: number;
 };
 
 const defaultSetting: ObstacleProps = {
   groundHeight: 20,
-  count: 2, // 同時に画面に出現できる障害物の数
-  heights: [10, 20],
-  popRate: 0.01,
-  minDistance: 30,
+  count: 4, // count of obstacles at the same time
+  heights: new Array(20).fill(0).map((_, i) => 5 + i), // Array of obstacle possible heights
+  popRate: 0.1,
+  minDistance: 20,
+  speed: 2,
 };
 
 export default function useObstacles() {
@@ -67,7 +69,7 @@ export default function useObstacles() {
   };
 
   const add = (tick: number) => {
-    return initObstacle(tick, 100);
+    return initObstacle(tick, 98);
   };
 
   const pushHistory = (obst: Obstacle) => {
@@ -84,11 +86,11 @@ export default function useObstacles() {
 
   const points = useMemo(() => calcObstaclePoint(history), [history]);
 
-  const move = (tick: number, delta: number) => {
+  const move = (tick: number) => {
     const items = data.map((item) => {
       return {
         ...item,
-        position: item.position - delta,
+        position: item.position - setting.speed,
       } as Obstacle;
     });
 
@@ -117,12 +119,9 @@ export default function useObstacles() {
     });
   }, [data]);
 
-  if (!process.env.DISABLE_DEBUG) {
-    console.log("watch obstacles data", data);
-  }
-
   return {
     data,
+    setting,
     history,
     points,
     body,
