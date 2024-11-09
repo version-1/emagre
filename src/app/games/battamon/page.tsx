@@ -43,6 +43,7 @@ export default function Battamon() {
       <div className={styles.container}>
         <div className={styles.header}>
           <h1 className={styles.title}>バッタモン</h1>
+          <p className={styles.version}>Ver 20241109</p>
         </div>
         <div className={styles.main}>
           <div className={styles.content}>
