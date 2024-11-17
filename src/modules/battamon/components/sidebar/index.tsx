@@ -12,7 +12,7 @@ export default function Sidebar() {
     const unwatch = listenRankings(
       (rankings: Ranking[]) => {
         const list = flattenResults(rankings);
-        setRankings(list);
+        setRankings(list.slice(0, 10));
       },
       {
         per: 10,

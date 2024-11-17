@@ -1,5 +1,5 @@
 import {
-  addDoc,
+  doc,
   collection,
   query,
   orderBy,
@@ -10,6 +10,9 @@ import {
   onSnapshot,
   QueryDocumentSnapshot,
   Query,
+  runTransaction,
+  Transaction,
+  getCountFromServer,
 } from "@firebase/firestore";
 import { db } from "@/services/firebase";
 import { Ranking } from "../../models/ranking";
@@ -39,23 +42,25 @@ export async function addRanking({
   const q = query(
     collref,
     orderBy("score", "desc"),
-    where("score", ">=", score),
+    where("score", "==", score),
     limit(1),
   );
-  const querySnapshot = await getDocs(q);
-  const prev = querySnapshot.docs?.[0]?.data();
-  if (prev?.score === score) {
-    return addDocToRanking(prev.id, { name, time, setting, timestamp });
-  }
+  const qs = await getDocs(q);
+  await runTransaction(db, async (tx) => {
+    let docId = qs.docs[0]?.id;
+    if (!qs.docs || qs.docs.length === 0) {
+      const newDoc = doc(collection(db, "rankings"));
+      tx.set(newDoc, {
+        rank,
+        score,
+        cursor: `${score}-${timestamp}`,
+        timestamp,
+      });
+      docId = newDoc.id;
+    }
 
-  const doc = await addDoc(collection(db, "rankings"), {
-    rank,
-    score,
-    cursor: `${score}-${timestamp}`,
-    timestamp,
+    return addDocToRanking(tx, docId, { name, time, setting, timestamp });
   });
-
-  return addDocToRanking(doc.id, { name, time, setting, timestamp });
 }
 
 type SettingParams = {
@@ -64,7 +69,8 @@ type SettingParams = {
   speed: number;
 };
 
-function addDocToRanking(
+async function addDocToRanking(
+  tx: Transaction,
   id: string,
   {
     name,
@@ -73,12 +79,20 @@ function addDocToRanking(
     timestamp,
   }: { name: string; time: number; setting: SettingParams; timestamp: number },
 ) {
-  return addDoc(collection(db, namespaces.rankings, id, namespaces.results), {
+  const newDoc = doc(
+    collection(db, namespaces.rankings, id, namespaces.results),
+  );
+  tx.set(newDoc, {
     name,
     time,
     setting,
     timestamp,
   });
+  const snapshot = await getCountFromServer(
+    query(collection(db, namespaces.rankings, id, namespaces.results)),
+  );
+  const count = snapshot.data().count;
+  tx.update(doc(db, namespaces.rankings, id), { count: count + 1 });
 }
 
 export async function getRankings({
@@ -120,7 +134,7 @@ export async function getRankingsAround({
   const afterQuery = query(
     collref,
     orderBy("score", "desc"),
-    where("score", "<=", score),
+    where("score", "<", score),
     limit(take),
   );
 
@@ -145,7 +159,7 @@ function mapSnapshot(snapshot: Foreach, perForSubDocs: number) {
     );
     const subQuery = query(
       subRef,
-      orderBy("timestamp", "desc"),
+      orderBy("timestamp", "asc"),
       limit(perForSubDocs),
     );
     res.push(scanList(doc, subQuery));

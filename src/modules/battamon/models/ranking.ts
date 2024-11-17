@@ -91,21 +91,21 @@ export const resolveRankings = (
 
   let list = [target];
   const t1 = [...beforeList];
-  t1.forEach(() => {
+  t1.some(() => {
     const e = beforeList.shift()!;
     list.unshift(e);
 
     if (list.length >= beforeAfterLength + 1) {
-      return;
+      return true;
     }
   });
 
   const t2 = [...afterList];
-  t2.forEach(() => {
+  t2.some(() => {
     const e = afterList.shift()!;
     list.push(e.incrementRank());
     if (list.length >= desiredLength) {
-      return;
+      return true;
     }
   });
 
@@ -114,11 +114,11 @@ export const resolveRankings = (
   }
 
   const t3 = [...beforeList];
-  t3.forEach((_) => {
+  t3.some((_) => {
     const e = beforeList.shift();
     list.unshift(e!);
     if (list.length >= desiredLength) {
-      return;
+      return true;
     }
   });
 
