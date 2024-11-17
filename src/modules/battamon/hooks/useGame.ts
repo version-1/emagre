@@ -4,6 +4,19 @@ import { Result } from "../models/result";
 
 type Statuses = "clear" | "ready" | "playing" | "gameover";
 
+const pointPerTime = 100;
+
+const culcScore = (time: number, obstaclePoints: number) => {
+  const timePoints = Math.floor(time / 1000) * pointPerTime;
+  return timePoints + obstaclePoints;
+};
+
+const calcObstaclePoint = (list: Obstacle[]) => {
+  return list.reduce((acc: number, item: Obstacle) => {
+    return item.height * 100 + acc;
+  }, 0);
+};
+
 export default function useGame() {
   const [status, setStatus] = useState<Statuses>("ready");
   const [score, setScore] = useState(0);
@@ -23,6 +36,10 @@ export default function useGame() {
   const isGameover = status === "gameover";
   const isPlaying = status === "playing";
 
+  const updateScore = (time: number, obstaclePoints: number) => {
+    setScore(culcScore(time, obstaclePoints));
+  };
+
   return {
     status,
     score,
@@ -30,7 +47,7 @@ export default function useGame() {
     isPlaying,
     isGameover,
     setStatus,
-    setScore,
+    updateScore,
     setResult: _setResult,
   };
 }

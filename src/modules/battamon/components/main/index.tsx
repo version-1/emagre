@@ -8,6 +8,7 @@ import playerImg from "../../assets/images/grasshopper.svg";
 import useObstacles, { Obstacle } from "../../hooks/useObstacle";
 import usePlayer from "../../hooks/usePlayer";
 import useGame from "../../hooks/useGame";
+import useScore from "../../hooks/useScore";
 import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
 import { cls } from "@/lib/styles";
@@ -22,21 +23,12 @@ function displayTime(time: number) {
   return `${pad(Math.floor(time / 1000 / 60))} : ${pad(Math.floor(time / 1000) % 60)}`;
 }
 
-const pointPerTime = 100;
-
 export default function BattamonGame() {
   const [time, setTime] = useState(0);
   const [timer] = useState(new Timer({ interval: 100 }));
-  const {
-    result,
-    status,
-    score,
-    isPlaying,
-    isGameover,
-    setResult,
-    setStatus,
-    setScore,
-  } = useGame();
+  const { result, status, isPlaying, isGameover, setResult, setStatus } =
+    useGame();
+  const { score, update: updateScore } = useScore();
   const obstacles = useObstacles();
   const player = usePlayer({
     startPosition,
@@ -85,8 +77,7 @@ export default function BattamonGame() {
         obstacles.pushHistory(headObstacle);
       }
 
-      const timePoints = Math.floor(timer.value / 1000) * pointPerTime;
-      setScore(timePoints + obstacles.points);
+      updateScore(timer.value, obstacles.history, obstacles.setting);
     }
 
     if (conflict) {
@@ -157,7 +148,7 @@ export default function BattamonGame() {
         <div className={styles.controller}>
           <div className={styles.settings}>
             <div className={styles.setting}>
-              <label className={styles.settingLabel}>Speed</label>
+              <label className={styles.settingLabel}>速さ</label>
               <div className={styles.settingValue}>
                 <span className={styles.settingValueText}>
                   {obstacles.setting.speed}
@@ -165,7 +156,7 @@ export default function BattamonGame() {
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="5"
                   step="1"
                   value={obstacles.setting.speed}
                   disabled={isPlaying}
@@ -178,28 +169,7 @@ export default function BattamonGame() {
               </div>
             </div>
             <div className={styles.setting}>
-              <label className={styles.settingLabel}>Obstacle Count</label>
-              <div className={styles.settingValue}>
-                <span className={styles.settingValueText}>
-                  {obstacles.setting.count}
-                </span>
-                <input
-                  type="range"
-                  min="1"
-                  max={Math.floor(100 / obstacles.setting.minDistance)}
-                  step="1"
-                  value={obstacles.setting.count}
-                  disabled={isPlaying}
-                  onChange={(e) => {
-                    obstacles.updateSetting({
-                      count: Number(e.target.value),
-                    });
-                  }}
-                />
-              </div>
-            </div>
-            <div className={styles.setting}>
-              <label className={styles.settingLabel}>Obstacle Frequency</label>
+              <label className={styles.settingLabel}>障害物の発生頻度</label>
               <div className={styles.settingValue}>
                 <span className={styles.settingValueText}>
                   {Math.floor(obstacles.setting.popRate * 100)}%
@@ -220,15 +190,15 @@ export default function BattamonGame() {
               </div>
             </div>
             <div className={styles.setting}>
-              <label className={styles.settingLabel}>Min Distance</label>
+              <label className={styles.settingLabel}>障害物の間隔</label>
               <div className={styles.settingValue}>
                 <span className={styles.settingValueText}>
                   {obstacles.setting.minDistance}
                 </span>
                 <input
                   type="range"
-                  min="1"
-                  max="100"
+                  min="20"
+                  max="60"
                   step="1"
                   value={obstacles.setting.minDistance}
                   disabled={isPlaying}
