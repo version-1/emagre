@@ -7,6 +7,7 @@ import {
   startAfter,
   where,
   getDocs,
+  onSnapshot,
   QueryDocumentSnapshot,
   Query,
 } from "@firebase/firestore";
@@ -153,5 +154,14 @@ async function scanList(doc: QueryDocumentSnapshot, subQuery: Query) {
     count: results.length,
     results,
     timestamp: data.timestamp,
+  });
+}
+
+export function listenRankings(cb: (data: Ranking[]) => void, { per = 10 }) {
+  const collref = collection(db, namespaces.rankings);
+  const q = query(collref, orderBy("score", "desc"), limit(per));
+  return onSnapshot(q, async (doc) => {
+    const list = await mapSnapshot(doc.docs, per);
+    cb(list);
   });
 }

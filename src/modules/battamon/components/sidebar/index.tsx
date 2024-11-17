@@ -1,24 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 import styles from "./index.module.css";
-import { flattenResults } from "../../models/ranking";
+import { Ranking, flattenResults } from "../../models/ranking";
 import { Result } from "../../models/result";
-import { getRankings } from "../../services/firebase";
+import { listenRankings } from "../../services/firebase";
 
 export default function Sidebar() {
   const [rankings, setRankings] = useState<Result[]>([]);
 
   useEffect(() => {
-    const init = async () => {
-      const rankings = await getRankings({
-        cursor: "",
+    const unwatch = listenRankings(
+      (rankings: Ranking[]) => {
+        const list = flattenResults(rankings);
+        setRankings(list);
+      },
+      {
         per: 10,
-      });
-      const list = flattenResults(rankings);
+      },
+    );
 
-      setRankings(list);
+    return () => {
+      unwatch();
     };
-    init();
   }, []);
 
   return (
@@ -30,7 +33,7 @@ export default function Sidebar() {
             <li key={index} className={styles.rankingItem}>
               <div className={styles.rank}>{item.rank}. </div>
               <div className={styles.name}>{item.name}</div>
-              <div className={styles.score}>{item.score}</div>
+              <div className={styles.score}>{item.score?.toLocaleString()}</div>
             </li>
           ))}
         </ul>
