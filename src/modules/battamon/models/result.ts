@@ -1,8 +1,16 @@
 import { Ranking } from "./ranking";
 
+type Setting = {
+  minDistance: number;
+  popRate: number;
+  speed: number;
+};
+
 export type ResultParams = {
   id: string;
   name: string;
+  time: number;
+  setting: Setting;
   timestamp: number;
 };
 
@@ -32,6 +40,14 @@ export class Result {
 
   get name() {
     return this._raw.name;
+  }
+
+  get time() {
+    return this._raw.time;
+  }
+
+  get setting() {
+    return this._raw.setting;
   }
 
   get timestamp() {

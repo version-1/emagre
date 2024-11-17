@@ -23,10 +23,14 @@ const namespaces = {
 export async function addRanking({
   name,
   score,
+  time,
+  setting,
   rank,
   timestamp,
 }: {
   name: string;
+  time: number;
+  setting: SettingParams;
   score: number;
   rank: number;
   timestamp: number;
@@ -41,7 +45,7 @@ export async function addRanking({
   const querySnapshot = await getDocs(q);
   const prev = querySnapshot.docs?.[0]?.data();
   if (prev?.score === score) {
-    return addDocToRanking(prev.id, { name, timestamp });
+    return addDocToRanking(prev.id, { name, time, setting, timestamp });
   }
 
   const doc = await addDoc(collection(db, "rankings"), {
@@ -51,15 +55,28 @@ export async function addRanking({
     timestamp,
   });
 
-  return addDocToRanking(doc.id, { name, timestamp });
+  return addDocToRanking(doc.id, { name, time, setting, timestamp });
 }
+
+type SettingParams = {
+  minDistance: number;
+  popRate: number;
+  speed: number;
+};
 
 function addDocToRanking(
   id: string,
-  { name, timestamp }: { name: string; timestamp: number },
+  {
+    name,
+    time,
+    setting,
+    timestamp,
+  }: { name: string; time: number; setting: SettingParams; timestamp: number },
 ) {
   return addDoc(collection(db, namespaces.rankings, id, namespaces.results), {
     name,
+    time,
+    setting,
     timestamp,
   });
 }
@@ -142,8 +159,8 @@ async function scanList(doc: QueryDocumentSnapshot, subQuery: Query) {
   const subSnapshot = await getDocs(subQuery);
   const results: ResultParams[] = [];
   subSnapshot.forEach((subDoc: QueryDocumentSnapshot) => {
-    const { name, timestamp } = subDoc.data();
-    results.push({ id: subDoc.id, name, timestamp });
+    const { name, time, setting, timestamp } = subDoc.data();
+    results.push({ id: subDoc.id, name, time, setting, timestamp });
   });
 
   return new Ranking({

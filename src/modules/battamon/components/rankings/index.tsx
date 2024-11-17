@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "./index.module.css";
 import { resolveRankings } from "../../models/ranking";
-import { Result } from "../../models/result";
+import { Result, Setting } from "../../models/result";
 import { getRankingsAround, addRanking } from "../../services/firebase";
 import { cls, join } from "@/lib/styles";
 
@@ -37,8 +37,8 @@ function Form({ data, onSubmit, onBack }: FormProps) {
           alert("名前は10文字以内で入力してください");
           return;
         }
-        data.setName(name);
-        onSubmit?.(data);
+        const newData = data.setName(name);
+        onSubmit?.(newData);
       }}
     >
       <input
@@ -74,6 +74,8 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
     await addRanking({
       name: data.name,
       score: data.score!,
+      time: data.time!,
+      setting: data.setting!,
       rank: data.rank!,
       timestamp: data.timestamp,
     });
@@ -99,6 +101,8 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
       const newData = data.parent!.setRank(rank);
       const result = newData.buildResult({
         name: "Guest",
+        time: data.time,
+        setting: data.setting,
         timestamp: newData.timestamp,
       });
       setForm(result);
@@ -136,7 +140,7 @@ export default function Rankings({ data, onRestart, onShow, onSubmit }: Props) {
                 // new ranking record doesn't have id and put placeholder for it.
                 return (
                   <li
-                    key={item.id || 'yours'}
+                    key={item.id || "yours"}
                     className={cls({
                       [styles.item]: true,
                       [styles.itemEven]: !yours && even,

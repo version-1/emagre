@@ -13,7 +13,7 @@ import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
 import { cls } from "@/lib/styles";
 
-const startPosition = 20;
+const startPosition = 10;
 const groundHeight = 20;
 
 function displayTime(time: number) {
@@ -83,8 +83,9 @@ export default function BattamonGame() {
     if (conflict) {
       timer.stop();
       setStatus("gameover");
-      setResult({
-        score,
+      setResult(score, {
+        time: timer.value,
+        setting: obstacles.setting,
       });
       return;
     }
