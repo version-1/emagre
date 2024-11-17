@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useTimer } from "../lib/timer";
 
 type Position = {
@@ -13,6 +13,17 @@ type Player = {
 const v0 = 9.8 * 4.5;
 const g = 9.8 * 10;
 const jumpInterval = 100;
+
+function calcNextPos(currentPos: number, time: number) {
+  const sec = time / 1000;
+
+  // upward
+  const delta = v0 * sec - (g * sec * sec) / 2;
+  return currentPos + delta;
+}
+
+let jumping = false;
+let positionY = 0;
 
 export default function usePlayer({
   startPosition,
@@ -39,35 +50,28 @@ export default function usePlayer({
         },
       };
     });
+    positionY = y;
 
     return 0;
   };
 
   const jump = () => {
-    timer.start();
-  };
-
-  const jumping = data.position.y > groundHeight;
-
-  useEffect(() => {
-    if (timer.value <= 0) {
+    if (jumping) {
       return;
     }
-    const currentPos = data.position.y;
+    jumping = true;
+    timer.start((t) => {
+      const nextPos = calcNextPos(positionY, t);
+      setY(nextPos);
 
-    const sec = timer.value / 1000;
-
-    // upward
-    const delta = v0 * sec - (g * sec * sec) / 2;
-    const nextPos = currentPos + delta;
-    setY(nextPos);
-
-    if (nextPos <= groundHeight) {
-      setY(groundHeight);
-      timer.stop();
-      timer.reset();
-    }
-  }, [timer.value]);
+      if (nextPos <= groundHeight) {
+        setY(groundHeight);
+        timer.stop();
+        timer.reset();
+        jumping = false;
+      }
+    });
+  };
 
   const body = useMemo(() => {
     const bodySize = 4;

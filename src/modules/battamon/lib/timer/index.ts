@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 type Props = {
   interval?: number;
-}
+};
 
 export const useTimer = ({ interval }: Props) => {
   const [value, setValue] = useState(0);
@@ -12,26 +12,26 @@ export const useTimer = ({ interval }: Props) => {
     timer.start((t) => {
       setValue(t);
       cb?.(t);
-    })
-  }
+    });
+  };
 
   const stop = () => {
     timer.stop();
-  }
+  };
 
   const reset = () => {
     setValue(0);
     timer.reset();
-  }
+  };
 
   return {
     value,
     start,
     stop,
     reset,
-    timer
-  }
-}
+    timer,
+  };
+};
 
 export class Timer {
   id?: NodeJS.Timeout;
@@ -74,4 +74,3 @@ export class Timer {
     this.value = 0;
   }
 }
-
