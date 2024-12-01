@@ -1,0 +1,70 @@
+.container {
+  position: absolute;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 320px;
+  height: 320px;
+}
+
+.buttonY,
+.buttonX,
+.buttonA,
+.buttonB {
+  position: absolute;
+  cursor: pointer;
+}
+
+.buttonYLabel,
+.buttonXLabel,
+.buttonALabel,
+.buttonBLabel {
+  cursor: pointer;
+  position: absolute;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  z-index: 1;
+}
+
+.buttonY {
+  top: 0;
+}
+
+.buttonX {
+  top: 35%;
+  left: 0;
+}
+
+.buttonA {
+  top: 35%;
+  right: 0;
+}
+
+.buttonB {
+  bottom: 0;
+}
+
+.buttonYLabel {
+  top: 30px;
+}
+
+.buttonXLabel {
+  left: 36px;
+  top: 138px;
+}
+
+.buttonALabel {
+  bottom: 36px;
+}
+
+.buttonBLabel {
+  right: 36px;
+  top: 138px;
+}
+
+
