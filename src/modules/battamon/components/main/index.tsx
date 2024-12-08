@@ -11,7 +11,6 @@ import useGame from "../../hooks/useGame";
 import useScore from "../../hooks/useScore";
 import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
-import { cls } from "@/lib/styles";
 
 const startPosition = 10;
 const groundHeight = 20;
@@ -145,101 +144,6 @@ export default function BattamonGame() {
             />
           ))}
           <div className={styles.grand}></div>
-        </div>
-        <div className={styles.controller}>
-          <div className={styles.settings}>
-            <div className={styles.setting}>
-              <label className={styles.settingLabel}>速さ</label>
-              <div className={styles.settingValue}>
-                <span className={styles.settingValueText}>
-                  {obstacles.setting.speed}
-                </span>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  step="1"
-                  value={obstacles.setting.speed}
-                  disabled={isPlaying}
-                  onChange={(e) => {
-                    obstacles.updateSetting({
-                      speed: Number(e.target.value),
-                    });
-                  }}
-                />
-              </div>
-            </div>
-            <div className={styles.setting}>
-              <label className={styles.settingLabel}>障害物の発生頻度</label>
-              <div className={styles.settingValue}>
-                <span className={styles.settingValueText}>
-                  {Math.floor(obstacles.setting.popRate * 100)}%
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="5"
-                  value={obstacles.setting.popRate * 100}
-                  disabled={isPlaying}
-                  onChange={(e) => {
-                    obstacles.updateSetting({
-                      popRate: Number(e.target.value) / 100,
-                    });
-                  }}
-                />
-              </div>
-            </div>
-            <div className={styles.setting}>
-              <label className={styles.settingLabel}>障害物の間隔</label>
-              <div className={styles.settingValue}>
-                <span className={styles.settingValueText}>
-                  {obstacles.setting.minDistance}
-                </span>
-                <input
-                  type="range"
-                  min="20"
-                  max="60"
-                  step="1"
-                  value={obstacles.setting.minDistance}
-                  disabled={isPlaying}
-                  onChange={(e) => {
-                    obstacles.updateSetting({
-                      minDistance: Number(e.target.value),
-                    });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-          <div className={styles.actions}>
-            <div className={styles.buttons}>
-              <button
-                className={cls({
-                  [styles.button]: true,
-                  [styles.buttonDisabled]: status === "playing",
-                })}
-                disabled={status === "playing"}
-                onClick={() => {
-                  if (isGameover) {
-                    restart();
-                    return;
-                  }
-
-                  if (timer.tick) {
-                    return;
-                  }
-
-                  setStatus("playing");
-                  timer.start((t) => {
-                    setTime(t);
-                  });
-                }}
-              >
-                {isGameover ? "Restart" : "Start"}
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

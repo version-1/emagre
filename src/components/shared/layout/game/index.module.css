@@ -1,8 +1,10 @@
 .container {
   display: flex;
-  justify-content: space-between;
-  height: calc(100vh - 48px);
+  justify-content: center;
+  position: relative;
+  height: 100vh;
   overflow: hidden;
+  background: #494194
 }
 
 .left {
@@ -20,4 +22,73 @@
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: absolute;
+  top: 20%;
+  z-index: 1;
+}
+
+.cover {
+  opacity: 0;
+  animation: fadeInOut 2s 1;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.bottomBar {
+  position: absolute;
+  bottom: 0;
+  height: auto;
+  width: auto;
+}
+
+.leftSholder {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  width: auto;
+}
+
+.rightSholder {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: auto;
+  width: auto;
+}
+
+.leftTrigger {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: auto;
+  width: auto;
+}
+
+.rightTrigger {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: auto;
+  width: auto;
+}
+
+.displayBackground {
+  position: absolute;
+  top: 17%;
+  height: auto;
+  width: auto;
 }

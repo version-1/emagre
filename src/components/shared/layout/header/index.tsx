@@ -3,6 +3,9 @@ import Image from "next/image";
 import logoImage from "@/assets/emagre-logo-large.png";
 
 export default function Header() {
+  if (true) {
+    return null;
+  }
   return (
     <header className={styles.container}>
       <div className={styles.logo}>

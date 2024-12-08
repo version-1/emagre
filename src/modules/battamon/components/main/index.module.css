@@ -2,13 +2,13 @@
   --line-color: #2e2e2e;
   display: flex;
   justify-content: center;
+  background: white;
 }
 
 .field {
   position: relative;
   height: 600px;
   width: 900px;
-  margin: 8px auto;
   border: 1px solid var(--color-border);
 }
 
