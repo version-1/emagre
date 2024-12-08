@@ -11,6 +11,7 @@ import useGame from "../../hooks/useGame";
 import useScore from "../../hooks/useScore";
 import { Timer } from "../../lib/timer";
 import { intersect } from "@/lib/diagram";
+import { useController } from "@/hooks/useController";
 
 const startPosition = 10;
 const groundHeight = 20;
@@ -23,6 +24,8 @@ function displayTime(time: number) {
 }
 
 export default function BattamonGame() {
+  const controller = useController();
+
   const [time, setTime] = useState(0);
   const [timer] = useState(new Timer({ interval: 100 }));
   const { result, status, isPlaying, isGameover, setResult, setStatus } =
@@ -53,6 +56,43 @@ export default function BattamonGame() {
       setTime(t);
     });
   }
+
+  function start() {
+    if (isGameover) {
+      restart();
+      return;
+    }
+
+    if (timer.tick) {
+      return;
+    }
+
+    setStatus("playing");
+    timer.start((t) => {
+      setTime(t);
+    });
+  }
+
+  useEffect(() => {
+    const resetKeybindings = controller.setHandler({
+      a: () => {
+        start();
+      },
+      b: () => {},
+      up: () => {
+        if (!player.jumping && status === "playing") {
+          player.jump();
+        }
+      },
+      down: () => {},
+      left: () => {},
+      right: () => {},
+    });
+
+    return () => {
+      resetKeybindings();
+    };
+  }, [player.jumping, player.jump, status]);
 
   useEffect(() => {
     return () => {
@@ -89,24 +129,10 @@ export default function BattamonGame() {
       return;
     }
 
-    function onKeydown(e: KeyboardEvent) {
-      e.preventDefault();
-      if (e.key === " ") {
-        if (!player.jumping && status === "playing") {
-          player.jump();
-        }
-      }
-    }
-    document.addEventListener("keydown", onKeydown);
-
     if (time > 99 * 60 * 1000) {
       timer.stop();
       setStatus("clear");
     }
-
-    return () => {
-      document.removeEventListener("keydown", onKeydown);
-    };
   }, [time]);
 
   return (

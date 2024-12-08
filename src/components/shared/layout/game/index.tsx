@@ -12,6 +12,7 @@ import displayCover from "@/assets/images/cover.svg";
 import CrossButton from "@/components/shared/crossButton";
 import Button from "@/components/shared/controller/button";
 import Menu from "@/components/shared/controller/menu";
+import { ControllerProvider } from "@/hooks/useController";
 
 type Props = {
   children: React.ReactNode;
@@ -20,15 +21,11 @@ type Props = {
 const menu = [
   {
     label: "遊び方",
-    onClick: () => {
-      alert("遊び方");
-    },
+    actionType: "howToPlay",
   },
   {
     label: "ランキング",
-    onClick: () => {
-      alert("Load");
-    },
+    actionType: "ranking",
   },
 ];
 
@@ -40,51 +37,54 @@ export default function Layout({ children }: Props) {
       setIsLoading(false);
     }, 1000);
   }, []);
+
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        {isLoading ? (
-          <div className={styles.cover}>
-            <Image src={displayCover} alt="Cover Image" />
-          </div>
-        ) : (
-          children
-        )}
+    <ControllerProvider>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          {isLoading ? (
+            <div className={styles.cover}>
+              <Image src={displayCover} alt="Cover Image" />
+            </div>
+          ) : (
+            children
+          )}
+        </div>
+        <Menu menu={menu} position={{ top: "60%", right: "2%" }} />
+        <Button position={{ top: "30%", right: "2%" }} />
+        <CrossButton
+          position={{
+            top: "35%",
+            left: "5%",
+          }}
+        />
+        <Image src={bottomBar} alt="BottomBar" className={styles.bottomBar} />
+        <Image
+          src={leftSholder}
+          alt="LeftSholder"
+          className={styles.leftSholder}
+        />
+        <Image
+          src={rightSholder}
+          alt="RightSholder"
+          className={styles.rightSholder}
+        />
+        <Image
+          src={leftTrigger}
+          alt="LeftTrigger"
+          className={styles.leftTrigger}
+        />
+        <Image
+          src={rightTrigger}
+          alt="RightTrigger"
+          className={styles.rightTrigger}
+        />
+        <Image
+          src={displayBackground}
+          alt="DisplayBackground"
+          className={styles.displayBackground}
+        />
       </div>
-      <Menu menu={menu} position={{ top: "60%", right: "2%" }} />
-      <Button position={{ top: "30%", right: "2%" }} />
-      <CrossButton
-        position={{
-          top: "35%",
-          left: "5%",
-        }}
-      />
-      <Image src={bottomBar} alt="BottomBar" className={styles.bottomBar} />
-      <Image
-        src={leftSholder}
-        alt="LeftSholder"
-        className={styles.leftSholder}
-      />
-      <Image
-        src={rightSholder}
-        alt="RightSholder"
-        className={styles.rightSholder}
-      />
-      <Image
-        src={leftTrigger}
-        alt="LeftTrigger"
-        className={styles.leftTrigger}
-      />
-      <Image
-        src={rightTrigger}
-        alt="RightTrigger"
-        className={styles.rightTrigger}
-      />
-      <Image
-        src={displayBackground}
-        alt="DisplayBackground"
-        className={styles.displayBackground}
-      />
-    </div>
+    </ControllerProvider>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 import styles from "./index.module.css";
+import { useController } from "@/hooks/useController";
 
 interface MenuItem {
   label: string;
-  onClick: () => void;
+  actionType: string;
 }
 
 type Props = {
@@ -15,6 +16,8 @@ type Props = {
 };
 
 export default function Menu({ menu, position }: Props) {
+  const { push } = useController();
+
   return (
     <div className={styles.container} style={{ ...position }}>
       <div className={styles.content}>
@@ -23,7 +26,9 @@ export default function Menu({ menu, position }: Props) {
             <div
               key={item.label}
               className={styles.menuItem}
-              onClick={item.onClick}
+              onClick={() => {
+                push({ type: item.actionType });
+              }}
             >
               <div className={styles.circle}></div>
               <div className={styles.label}>{item.label}</div>

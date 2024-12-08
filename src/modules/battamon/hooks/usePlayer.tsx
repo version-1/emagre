@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useTimer } from "../lib/timer";
 
 type Position = {
@@ -40,22 +40,25 @@ export default function usePlayer({
     },
   });
 
-  const setY = (y: number) => {
-    setData((prev) => {
-      return {
-        ...prev,
-        position: {
-          ...prev.position,
-          y,
-        },
-      };
-    });
-    positionY = y;
+  const setY = useCallback(
+    (y: number) => {
+      setData((prev) => {
+        return {
+          ...prev,
+          position: {
+            ...prev.position,
+            y,
+          },
+        };
+      });
+      positionY = y;
 
-    return 0;
-  };
+      return 0;
+    },
+    [setData],
+  );
 
-  const jump = () => {
+  const jump = useCallback(() => {
     if (jumping) {
       return;
     }
@@ -71,7 +74,7 @@ export default function usePlayer({
         jumping = false;
       }
     });
-  };
+  }, [setY]);
 
   const body = useMemo(() => {
     const bodySize = 4;
