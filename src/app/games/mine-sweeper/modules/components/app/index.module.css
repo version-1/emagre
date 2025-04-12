@@ -1,0 +1,22 @@
+.container {
+  display: flex;
+  justify-content: center;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #eee;
+  height: 32px;
+  width: 32px;
+  padding: 4px;
+  text-align: center;
+}
+
+.revealed {
+  background: white;
+}
