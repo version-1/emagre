@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Game } from "../../models/game";
 import { Cell } from "../../models/cell";
+import { Timer } from "../../models/timer";
 import styles from "./index.module.css";
 
 export default function GameApp({
@@ -10,23 +11,16 @@ export default function GameApp({
   game: Game;
   onChange: (game: Game) => void;
 }) {
+  const [timer, setTimer] = useState(new Timer());
   const gameRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    function handleRightClick(e: MouseEvent) {
-      e.preventDefault();
-
-      const clickedElement = e.target as HTMLDivElement;
-      const data: { x: number; y: number } = JSON.parse(
-        clickedElement?.getAttribute("data-cell") || "{}",
-      );
-      onChange(game.toggleFlag(data.x, data.y));
+    if (!game.isPlaying) {
+      return;
     }
-    gameRef.current?.addEventListener("contextmenu", handleRightClick);
-
-    return () => {
-      gameRef.current?.removeEventListener("contextmenu", handleRightClick);
-    };
-  }, [game]);
+    timer.tick((nextTimer: Timer) => {
+      setTimer(nextTimer);
+    });
+  }, [game, timer]);
 
   const width = game.settings.size * 32;
 
@@ -36,10 +30,12 @@ export default function GameApp({
         <div className={styles.status}>
           {game.isGameOver ? (
             <div className={styles.gameOver}>Game Over</div>
-          ) : game.isWin ? (
+          ) : game.isFinished ? (
             <div className={styles.win}>You Win!</div>
-          ) : (
+          ) : game.isPlaying ? (
             <div className={styles.playing}>Playing</div>
+          ) : (
+            <div className={styles.start}>Ready?</div>
           )}
         </div>
         <div className={styles.stats}>
@@ -57,7 +53,7 @@ export default function GameApp({
           </div>
           <div className={styles.state}>
             <div className={styles.label}>🕰️</div>
-            <div className={styles.value}>00:00</div>
+            <div className={styles.value}>{timer.toString()}</div>
           </div>
         </div>
       </div>
@@ -68,10 +64,16 @@ export default function GameApp({
               <div
                 key={cellIndex}
                 className={`${styles.cell} ${cell.isOpen ? styles.revealed : ""}`}
-                data-cell={JSON.stringify(cell.position)}
                 data-cell-debug={game.debug ? JSON.stringify(cell.state) : ""}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  if (!game.isPlaying) {
+                    return;
+                  }
+                  onChange(game.toggleFlag(cell.x, cell.y));
+                }}
                 onClick={() => {
-                  if (game.isGameOver) {
+                  if (game.isGameOver || game.isFinished) {
                     return;
                   }
 
@@ -101,7 +103,7 @@ export default function GameApp({
 
 function RevealedContent({ data }: { data: Cell }) {
   if (data.isMine) {
-    return <span className={styles.mine}>💣</span>;
+    return <>💣</>;
   }
 
   return <>{data.hint === 0 ? "" : data.hint}</>;

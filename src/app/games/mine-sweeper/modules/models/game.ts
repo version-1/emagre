@@ -3,6 +3,7 @@ import { Flags } from "./flags";
 
 enum GameStatus {
   initial = "initial",
+  playing = "playing",
   gameover = "gameover",
   finished = "finished",
 }
@@ -54,8 +55,16 @@ export class Game {
     return !!this.settings.debug;
   }
 
+  get isPlaying(): boolean {
+    return this.status === GameStatus.playing;
+  }
+
   get isGameOver(): boolean {
     return this.status === GameStatus.gameover;
+  }
+
+  get isFinished(): boolean {
+    return this.status === GameStatus.finished;
   }
 
   get isWin(): boolean {
@@ -82,16 +91,31 @@ export class Game {
   }
 
   get clone(): Game {
-    return new Game({
+    const clone = new Game({
       settings: this.settings,
       cells: this.cells,
       flags: this.flags,
     });
+    clone.status = this.status;
+
+    return clone;
   }
 
   gameOver(): Game {
     const clone = this.clone;
     clone.status = GameStatus.gameover;
+    return clone;
+  }
+
+  start(): Game {
+    const clone = this.clone;
+    clone.status = GameStatus.playing;
+    return clone;
+  }
+
+  complete(): Game {
+    const clone = this.clone;
+    clone.status = GameStatus.finished;
     return clone;
   }
 
@@ -115,12 +139,17 @@ export class Game {
     if (this.openedCellCount === 0) {
       const game = assignMines(this, this.cells[y][x]);
       const cells = openCellsRecursively(x, y, game.cells);
-      return this.setCells(cells);
+      return this.setCells(cells).start();
     }
 
     // open cell in normal case
     const newCells = openCellsRecursively(x, y, this.cells);
-    return this.setCells(newCells);
+    const res = this.setCells(newCells);
+    if (res.isWin) {
+      return res.complete();
+    }
+
+    return res;
   }
 
   isFlagged(x: number, y: number): boolean {
@@ -129,11 +158,10 @@ export class Game {
 
   toggleFlag(x: number, y: number): Game {
     const flags = this.flags.toggle(x, y);
-    return new Game({
-      settings: this.settings,
-      cells: this.cells,
-      flags,
-    });
+    const clone = this.clone;
+    clone.flags = flags;
+
+    return clone;
   }
 
   updateCells(x: number, y: number, newCell: Cell): Cell[][] {

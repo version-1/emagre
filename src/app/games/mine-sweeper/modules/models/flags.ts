@@ -1,16 +1,27 @@
 export class Flags {
-  list: [number, number][];
+  values = new Map<string, { x: number; y: number }>();
 
   constructor(list: [number, number][] = []) {
-    this.list = list;
+    this.values = new Map(
+      list.map((flag) => {
+        return [`${flag[0]}-${flag[1]}`, { x: flag[0], y: flag[1] }];
+      }),
+    );
   }
 
   get length(): number {
-    return this.list.length;
+    return this.values.size;
+  }
+
+  get clone(): Flags {
+    const list = Array.from(this.values.values()).map((flag) => {
+      return [flag.x, flag.y] as [number, number];
+    });
+    return new Flags(list);
   }
 
   has(x: number, y: number): boolean {
-    return this.list.some((flag) => flag[0] === x && flag[1] === y);
+    return this.values.has(`${x}-${y}`);
   }
 
   toggle(x: number, y: number): Flags {
@@ -22,17 +33,21 @@ export class Flags {
   }
 
   add(x: number, y: number): Flags {
-    const list = [...this.list];
-    if (!this.has(x, y)) {
-      list.push([x, y]);
+    if (this.has(x, y)) {
+      return this;
     }
 
-    return new Flags(list);
+    const clone = this.clone;
+    clone.values.set(`${x}-${y}`, { x, y });
+    return clone;
   }
 
   remove(x: number, y: number): Flags {
-    return new Flags(
-      this.list.filter((flag) => flag[0] !== x || flag[1] !== y),
-    );
+    if (!this.has(x, y)) {
+      return this;
+    }
+    const clone = this.clone;
+    clone.values.delete(`${x}-${y}`);
+    return clone;
   }
 }
