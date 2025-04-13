@@ -100,14 +100,7 @@ export default function GameApp({
                   onChange(newGame);
                 }}
               >
-                {cell.isOpen ? (
-                  <RevealedContent data={cell} />
-                ) : (
-                  <HiddenContent
-                    data={cell}
-                    flagged={game.isFlagged(cell.x, cell.y)}
-                  />
-                )}
+                <CellContent game={game} data={cell} />
               </div>
             ))}
           </div>
@@ -117,15 +110,32 @@ export default function GameApp({
   );
 }
 
-function RevealedContent({ data }: { data: Cell }) {
-  if (data.isMine) {
+function CellContent({ game, data }: { game: Game; data: Cell }) {
+  if (game.isGameOver) {
+    if (data.isMine) {
+      return <RevealedContent mine hint={0} />;
+    }
+  }
+  return (
+    <>
+      {data.isOpen ? (
+        <RevealedContent mine={data.isMine} hint={data.hint!} />
+      ) : (
+        <HiddenContent flagged={game.isFlagged(data.x, data.y)} />
+      )}
+    </>
+  );
+}
+
+function RevealedContent({ mine, hint }: { mine: boolean; hint: number }) {
+  if (mine) {
     return <>💣</>;
   }
 
-  return <>{data.hint === 0 ? "" : data.hint}</>;
+  return <>{hint === 0 ? "" : hint}</>;
 }
 
-function HiddenContent({ flagged }: { data: Cell; flagged: boolean }) {
+function HiddenContent({ flagged }: { flagged: boolean }) {
   return (
     <>
       {flagged ? (
