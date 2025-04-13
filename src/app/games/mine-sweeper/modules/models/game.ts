@@ -1,4 +1,5 @@
 import { Cell, createMine, createEmpty } from "./cell";
+import { Flags } from "./flags";
 
 enum GameStatus {
   initial = "initial",
@@ -9,6 +10,7 @@ enum GameStatus {
 type GameSettings = {
   size: number;
   mineCount: number;
+  debug?: boolean;
 };
 
 export class Game {
@@ -16,20 +18,51 @@ export class Game {
   settings: GameSettings;
 
   cells: Cell[][] = [];
+  flags: Flags;
 
   constructor({
     settings,
     cells,
+    flags,
   }: {
     settings: GameSettings;
     cells?: Cell[][];
+    flags?: Flags;
   }) {
     this.settings = settings;
     this.cells = cells || [];
+    this.flags = flags || new Flags([]);
+  }
+
+  get debug(): boolean {
+    return !!this.settings.debug;
   }
 
   get isGameOver(): boolean {
     return this.status === GameStatus.gameover;
+  }
+
+  get isWin(): boolean {
+    return this.remainingCellCount === this.settings.mineCount;
+  }
+
+  get openedCellCount(): number {
+    return this.cells.reduce((acc, row) => {
+      return (
+        acc +
+        row.reduce((acc, cell) => {
+          if (cell.isOpen) {
+            return acc + 1;
+          }
+
+          return acc;
+        }, 0)
+      );
+    }, 0);
+  }
+
+  get remainingCellCount(): number {
+    return this.settings.size * this.settings.size - this.openedCellCount;
   }
 
   gameOver(): Game {
@@ -52,6 +85,7 @@ export class Game {
       const game = new Game({
         settings: this.settings,
         cells,
+        flags: this.flags,
       });
 
       return game.gameOver();
@@ -62,6 +96,20 @@ export class Game {
     return new Game({
       settings: this.settings,
       cells: newCells,
+      flags: this.flags,
+    });
+  }
+
+  isFlagged(x: number, y: number): boolean {
+    return this.flags.has(x, y);
+  }
+
+  toggleFlag(x: number, y: number): Game {
+    const flags = this.flags.toggle(x, y);
+    return new Game({
+      settings: this.settings,
+      cells: this.cells,
+      flags,
     });
   }
 

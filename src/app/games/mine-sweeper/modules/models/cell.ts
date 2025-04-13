@@ -30,6 +30,13 @@ export class Cell {
     return this.value === CellType.empty;
   }
 
+  get position(): { x: number; y: number } {
+    return {
+      x: this.x,
+      y: this.y,
+    };
+  }
+
   open(): Cell {
     const clone = new Cell({
       x: this.x,
@@ -58,6 +65,22 @@ export class Cell {
     }
 
     return this.hint;
+  }
+
+  get state(): {
+    x: number;
+    y: number;
+    isOpen: boolean;
+    isMine: boolean;
+    hint?: number;
+  } {
+    return {
+      x: this.x,
+      y: this.y,
+      isOpen: this.isOpen,
+      isMine: this.isMine,
+      hint: this.hint,
+    };
   }
 }
 

@@ -1,6 +1,39 @@
 .container {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.header {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.status {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.stats {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 8px;
+}
+
+.label {
+  margin-right: 8px;
 }
 
 .row {
@@ -19,4 +52,10 @@
 
 .revealed {
   background: white;
+}
+
+.flagged {
+  position: relative;
+  top: -4px;
+  left: 4px;
 }
