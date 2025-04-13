@@ -7,7 +7,23 @@ enum GameStatus {
   finished = "finished",
 }
 
+export enum GameDifficulty {
+  easy = "easy",
+  medium = "medium",
+  hard = "hard",
+}
+
+export const GameDifficulties: Record<
+  GameDifficulty,
+  { size: number; mineCount: number }
+> = {
+  [GameDifficulty.easy]: { size: 9, mineCount: 10 },
+  [GameDifficulty.medium]: { size: 16, mineCount: 40 },
+  [GameDifficulty.hard]: { size: 24, mineCount: 99 },
+};
+
 type GameSettings = {
+  difficulty?: GameDifficulty;
   size: number;
   mineCount: number;
   debug?: boolean;
@@ -65,13 +81,24 @@ export class Game {
     return this.settings.size * this.settings.size - this.openedCellCount;
   }
 
-  gameOver(): Game {
-    const clone = new Game({
+  get clone(): Game {
+    return new Game({
       settings: this.settings,
       cells: this.cells,
+      flags: this.flags,
     });
+  }
+
+  gameOver(): Game {
+    const clone = this.clone;
     clone.status = GameStatus.gameover;
     return clone;
+  }
+
+  setCells(cells: Cell[][]): Game {
+    const game = this.clone;
+    game.cells = cells;
+    return game;
   }
 
   openCell(x: number, y: number): Game {
@@ -82,22 +109,18 @@ export class Game {
     if (this.cells[y][x].isMine) {
       const cell = this.cells[y][x].open();
       const cells = updateCells(x, y, this.cells, cell);
-      const game = new Game({
-        settings: this.settings,
-        cells,
-        flags: this.flags,
-      });
-
-      return game.gameOver();
+      return this.setCells(cells).gameOver();
     }
 
-    const newCells = openCellsRecursively(x, y, this.cells);
+    if (this.openedCellCount === 0) {
+      const game = assignMines(this, this.cells[y][x]);
+      const cells = openCellsRecursively(x, y, game.cells);
+      return this.setCells(cells);
+    }
 
-    return new Game({
-      settings: this.settings,
-      cells: newCells,
-      flags: this.flags,
-    });
+    // open cell in normal case
+    const newCells = openCellsRecursively(x, y, this.cells);
+    return this.setCells(newCells);
   }
 
   isFlagged(x: number, y: number): boolean {
@@ -163,26 +186,45 @@ function openCellsRecursively(x: number, y: number, cells: Cell[][]): Cell[][] {
   return newCells;
 }
 
-export function init(settings: GameSettings) {
-  // determine mine positions
-  const minePositions: [number, number][] = [];
-  for (let i = 0; i < settings.mineCount; i++) {
-    const x = Math.floor(Math.random() * settings.size);
-    const y = Math.floor(Math.random() * settings.size);
-    minePositions.push([x, y]);
-  }
+export function init(debug?: boolean): Game {
+  const difficulty = GameDifficulty.easy;
+  const settings = { ...GameDifficulties[difficulty], difficulty, debug };
 
   // put cells
   const cells: Cell[][] = [];
   for (let i = 0; i < settings.size; i++) {
     const row: Cell[] = [];
     for (let j = 0; j < settings.size; j++) {
-      const isMine = minePositions.some(([x, y]) => x === j && y === i);
-      const value = isMine ? createMine(j, i) : createEmpty(j, i);
-      row.push(value);
+      row.push(createEmpty(j, i));
     }
     cells.push(row);
   }
+
+  return new Game({
+    settings,
+    cells,
+  });
+}
+
+function assignMines(game: Game, initialCell: Cell): Game {
+  // determine mine positions
+  const minePositions: [number, number][] = [];
+  for (let i = 0; i < game.settings.mineCount; i++) {
+    let pos = { x: initialCell.x, y: initialCell.y };
+    while (pos.x === initialCell.x && pos.y === initialCell.y) {
+      pos = {
+        x: Math.floor(Math.random() * game.settings.size),
+        y: Math.floor(Math.random() * game.settings.size),
+      };
+    }
+    minePositions.push([pos.x, pos.y]);
+  }
+
+  // put mines
+  const cells: Cell[][] = [...game.cells];
+  minePositions.forEach(([x, y]) => {
+    cells[y][x] = createMine(x, y);
+  });
 
   // calculate hints
   cells.forEach((row) => {
@@ -193,7 +235,7 @@ export function init(settings: GameSettings) {
     });
   });
   return new Game({
-    settings,
-    cells,
+    settings: game.settings,
+    cells: game.cells,
   });
 }
