@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { init, Game, GameDifficulty } from "../../models/game";
 import { Cell } from "../../models/cell";
 import { Timer } from "../../models/timer";
@@ -13,7 +13,6 @@ export default function GameApp({
 }) {
   const [difficulty, setDifficulty] = useState(game.settings.difficulty);
   const [timer, setTimer] = useState(new Timer());
-  const gameRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!game.isPlaying) {
       return;
@@ -26,7 +25,7 @@ export default function GameApp({
   const width = game.settings.size * 32;
 
   return (
-    <div className={styles.container} ref={gameRef}>
+    <div className={styles.container}>
       <div className={styles.header} style={{ width }}>
         <div className={styles.status}>
           {game.isGameOver ? (
@@ -50,6 +49,7 @@ export default function GameApp({
                   }
                   const d = e.target.value as GameDifficulty;
                   setDifficulty(d);
+                  setTimer(new Timer());
                   onChange(init(d));
                 }}
               >

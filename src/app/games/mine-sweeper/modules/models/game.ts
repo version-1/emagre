@@ -215,7 +215,7 @@ function openCellsRecursively(x: number, y: number, cells: Cell[][]): Cell[][] {
 }
 
 export function init(
-  difficulty: GameDifficulty = GameDifficulty.easy,
+  difficulty: GameDifficulty = GameDifficulty.medium,
   debug?: boolean,
 ): Game {
   const settings = { ...GameDifficulties[difficulty], difficulty, debug };
