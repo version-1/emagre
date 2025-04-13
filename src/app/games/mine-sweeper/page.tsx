@@ -5,7 +5,7 @@ import App from "./modules/components/app";
 import styles from "./page.module.css";
 
 export default function MineSweeper() {
-  const [game, setGame] = useState<Game>(init(true));
+  const [game, setGame] = useState<Game>(init());
   return (
     <div className={styles.container}>
       <div className={styles.main}>

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Game } from "../../models/game";
+import { init, Game, GameDifficulty } from "../../models/game";
 import { Cell } from "../../models/cell";
 import { Timer } from "../../models/timer";
 import styles from "./index.module.css";
@@ -11,6 +11,7 @@ export default function GameApp({
   game: Game;
   onChange: (game: Game) => void;
 }) {
+  const [difficulty, setDifficulty] = useState(game.settings.difficulty);
   const [timer, setTimer] = useState(new Timer());
   const gameRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -40,16 +41,31 @@ export default function GameApp({
         </div>
         <div className={styles.stats}>
           <div className={styles.state}>
+            <div className={styles.value}>
+              <select
+                value={difficulty}
+                onChange={(e) => {
+                  if (game.isPlaying) {
+                    return;
+                  }
+                  const d = e.target.value as GameDifficulty;
+                  setDifficulty(d);
+                  onChange(init(d));
+                }}
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+          <div className={styles.state}>
             <div className={styles.label}>💣</div>
             <div className={styles.value}>{game.settings.mineCount}</div>
           </div>
           <div className={styles.state}>
             <div className={styles.label}>🚩</div>
             <div className={styles.value}>{game.flags.length}</div>
-          </div>
-          <div className={styles.state}>
-            <div className={styles.label}>🪟</div>
-            <div className={styles.value}>{game.remainingCellCount}</div>
           </div>
           <div className={styles.state}>
             <div className={styles.label}>🕰️</div>
