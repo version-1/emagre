@@ -8,39 +8,9 @@ const list = [
     to: "/games/battamon",
   },
   {
-    title: "オンライン将棋",
-    description: "将棋の対局ができる",
-    to: "/games/battamon",
-  },
-  {
-    title: "ブラックジャック",
-    description: "ブラックジャックです。",
-    to: "/games/battamon",
-  },
-  {
-    title: "Github スター数 チキンレース",
-    description: "OSSレポジトリのGithub スター数を集めて、ニアピンゲームをする",
-    to: "/games/battamon",
-  },
-  {
-    title: "スネークゲーム",
-    description: "スネークゲームです。",
-    to: "/games/battamon",
-  },
-  {
-    title: "テトリス",
-    description: "テトリスです。",
-    to: "/games/battamon",
-  },
-  {
-    title: "ブロック崩し",
-    description: "テトリスです。",
-    to: "/games/battamon",
-  },
-  {
-    title: "インベーダーゲーム",
-    description: "インベーダーゲームです。",
-    to: "/games/battamon",
+    title: "マインスイーパー",
+    description: "マインスイーパー",
+    to: "/games/mine-sweeper",
   },
 ];
 
